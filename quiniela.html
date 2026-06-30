@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Quiniela Mundial 2026</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { height:100%; }
+  body {
+    font-family: 'Avenir Next', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    background: #0B3D2E;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(255,209,102,0.10) 0%, transparent 45%),
+      radial-gradient(circle at 90% 85%, rgba(6,95,70,0.5) 0%, transparent 55%);
+    color: #F4F1E8;
+    min-height: 100%;
+    padding-bottom: 90px;
+  }
+
+  /* ---------- Header ---------- */
+  .topbar {
+    position: sticky; top:0; z-index:50;
+    background: linear-gradient(135deg, #062B20 0%, #0B3D2E 60%, #0F4D38 100%);
+    border-bottom: 3px solid #FFD166;
+    padding: 14px 16px 10px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.35);
+  }
+  .topbar h1 {
+    font-size: 19px;
+    letter-spacing: 0.5px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .topbar .stitch { font-size:16px; }
+  .topbar .sub {
+    font-size: 11px;
+    color: #BFE3D2;
+    margin-top: 2px;
+    letter-spacing: 0.4px;
+  }
+
+  /* ---------- Tab bar ---------- */
+  .tabbar {
+    position: sticky; top: 64px; z-index:49;
+    display:flex; overflow-x:auto;
+    background: #08311F;
+    border-bottom: 1px solid rgba(255,209,102,0.25);
+    -webkit-overflow-scrolling: touch;
+  }
+  .tabbar::-webkit-scrollbar { display:none; }
+  .tabbtn {
+    flex: 0 0 auto;
+    padding: 11px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #9FCBB4;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+  .tabbtn.active {
+    color: #FFD166;
+    border-bottom-color: #FFD166;
+  }
+
+  /* ---------- Content ---------- */
+  .view { display:none; padding: 14px; max-width: 720px; margin: 0 auto; }
+  .view.active { display:block; }
+
+  /* ---------- Dashboard ---------- */
+  .podium-wrap { margin-bottom: 18px; }
+  .rank-card {
+    display:flex; align-items:center; gap:12px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 9px;
+    position: relative;
+    overflow: hidden;
+  }
+  .rank-card.gold {
+    background: linear-gradient(90deg, rgba(255,209,102,0.22), rgba(255,255,255,0.05));
+    border-color: rgba(255,209,102,0.55);
+  }
+  .rank-card.silver { border-color: rgba(200,210,210,0.4); }
+  .rank-card.bronze { border-color: rgba(205,127,50,0.4); }
+  .rank-num {
+    font-size: 20px; font-weight:800;
+    width: 30px; text-align:center;
+    color: #FFD166;
+  }
+  .rank-card.gold .rank-num { font-size:24px; }
+  .rank-medal { font-size:22px; width:30px; text-align:center; }
+  .rank-info { flex:1; }
+  .rank-name { font-size:15.5px; font-weight:700; }
+  .rank-breakdown { font-size:10.5px; color:#A9CDBC; margin-top:2px; }
+  .rank-points { font-size:21px; font-weight:800; color:#FFD166; min-width:54px; text-align:right; }
+  .rank-points small { font-size:10px; font-weight:600; color:#A9CDBC; display:block; }
+
+  .section-label {
+    font-size: 12px; text-transform:uppercase; letter-spacing:1.2px;
+    color:#FFD166; font-weight:700; margin: 18px 0 8px; display:flex; align-items:center; gap:6px;
+  }
+  .section-label::after { content:""; flex:1; height:1px; background:rgba(255,209,102,0.25); }
+
+  table.phase-table {
+    width:100%; border-collapse: collapse; font-size: 11.5px;
+    background: rgba(255,255,255,0.04); border-radius:10px; overflow:hidden;
+  }
+  table.phase-table th, table.phase-table td {
+    padding: 8px 6px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.07);
+  }
+  table.phase-table th {
+    background: rgba(0,0,0,0.25); color:#BFE3D2; font-weight:600; font-size:10px;
+    text-transform:uppercase; letter-spacing:0.4px;
+  }
+  table.phase-table td.namecol { text-align:left; font-weight:600; }
+  table.phase-table tr:last-child td { border-bottom:none; }
+
+  .reset-btn {
+    margin-top: 22px;
+    width:100%;
+    padding: 11px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,99,99,0.4);
+    background: rgba(255,99,99,0.08);
+    color: #FF9B9B;
+    font-size: 12.5px;
+    font-weight:600;
+  }
+
+  /* ---------- Match cards ---------- */
+  .phase-header {
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom: 12px;
+  }
+  .phase-header h2 { font-size:17px; color:#FFD166; }
+  .phase-header span { font-size:11px; color:#9FCBB4; }
+
+  .match-card {
+    background: rgba(255,255,255,0.055);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 14px;
+    padding: 12px 14px 14px;
+    margin-bottom: 12px;
+  }
+  .match-label {
+    font-size: 10.5px; color:#86C2A4; font-weight:700;
+    text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;
+  }
+  .teams-row {
+    display:flex; align-items:center; gap:8px; margin-bottom:10px;
+  }
+  .team-input {
+    flex:1;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    color: #F4F1E8;
+    font-size: 13.5px;
+    font-weight:600;
+    padding: 8px 8px;
+    text-align:center;
+  }
+  .team-input::placeholder { color:#5E8C76; font-weight:500; }
+  .vs-label { font-size:10px; color:#7FAE96; font-weight:700; }
+
+  .result-row {
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    background: linear-gradient(90deg, rgba(255,209,102,0.12), rgba(255,209,102,0.04));
+    border: 1px dashed rgba(255,209,102,0.4);
+    border-radius: 10px;
+    padding: 8px 10px;
+    margin-bottom: 12px;
+  }
+  .result-row .lbl { font-size:10.5px; color:#FFD166; font-weight:700; text-transform:uppercase; letter-spacing:0.4px;}
+  .score-input {
+    width: 44px; padding:7px 0; text-align:center;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,209,102,0.5);
+    border-radius: 7px;
+    color:#FFD166; font-size:16px; font-weight:800;
+  }
+  .score-dash { color:#FFD166; font-weight:800; }
+
+  .pred-grid {
+    display:grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  .pred-cell {
+    border-radius: 9px;
+    padding: 7px 8px;
+    display:flex; align-items:center; justify-content:space-between; gap:6px;
+  }
+  .pred-cell .pname { font-size:10.5px; font-weight:700; }
+  .pred-cell .pscore-wrap { display:flex; align-items:center; gap:4px; }
+  .pred-cell input.pscore {
+    width: 30px; padding:5px 0; text-align:center;
+    background: rgba(0,0,0,0.28);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 6px;
+    color:#F4F1E8; font-size:13px; font-weight:700;
+  }
+  .pred-cell .pdash { font-size:11px; opacity:0.6; }
+  .pred-cell .ppts {
+    font-size:10px; font-weight:800; min-width:20px; text-align:center;
+    border-radius:6px; padding:3px 5px;
+  }
+  .pred-papa     { background: rgba(94,157,224,0.14); }
+  .pred-mama     { background: rgba(240,150,90,0.14); }
+  .pred-saul     { background: rgba(101,200,150,0.14); }
+  .pred-marcelo  { background: rgba(200,120,210,0.14); }
+
+  .ppts.pts3 { background:#2ECC71; color:#06301F; }
+  .ppts.pts2 { background:#FFD166; color:#3A2A00; }
+  .ppts.pts0 { background:rgba(255,255,255,0.10); color:#7FAE96; }
+  .ppts.ptsna { background:transparent; color:#5E8C76; }
+
+  .empty-note {
+    text-align:center; color:#7FAE96; font-size:12px; padding: 30px 10px;
+  }
+
+  .toast {
+    position:fixed; left:50%; bottom:22px; transform:translateX(-50%) translateY(20px);
+    background:#FFD166; color:#0B3D2E; font-weight:700; font-size:12.5px;
+    padding:9px 18px; border-radius:30px; opacity:0; pointer-events:none;
+    transition: all .25s ease; z-index:200; box-shadow:0 6px 20px rgba(0,0,0,0.4);
+  }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  .loading-wrap { text-align:center; padding:60px 10px; color:#7FAE96; font-size:13px; }
+
+  .save-status { font-size:10px; opacity:0.85; }
+  .save-status.saving { color:#FFD166; }
+  .save-status.saved { color:#86C2A4; }
+  .save-status.error { color:#FF9B9B; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1><span class="stitch">⚽</span> Quiniela Mundial 2026</h1>
+  <div class="sub">Papá · Mamá · Saúl · Marcelo <span id="saveStatus" class="save-status"></span></div>
+</div>
+
+<div class="tabbar" id="tabbar">
+  <button class="tabbtn" data-tab="dashboard">Dashboard</button>
+  <button class="tabbtn" data-tab="r32">Round of 32</button>
+  <button class="tabbtn" data-tab="oct">Octavos</button>
+  <button class="tabbtn" data-tab="cua">Cuartos</button>
+  <button class="tabbtn" data-tab="sem">Semifinal</button>
+  <button class="tabbtn" data-tab="fin">Final</button>
+</div>
+
+<div id="app">
+  <div class="loading-wrap">Cargando quiniela…</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+
+// ============================================================
+// CONFIG
+// ============================================================
+var PARTICIPANTS = [
+  { key:'papa',     name:'Papá',     cls:'pred-papa'    },
+  { key:'mama',     name:'Mamá',     cls:'pred-mama'    },
+  { key:'saul',     name:'Saúl',     cls:'pred-saul'    },
+  { key:'marcelo',  name:'Marcelo',  cls:'pred-marcelo' }
+];
+
+var BASE_POINTS = { papa:80, mama:70, saul:73, marcelo:75 };
+
+var PHASES = [
+  { key:'r32', label:'Round of 32', n:16 },
+  { key:'oct', label:'Octavos',     n:8  },
+  { key:'cua', label:'Cuartos',     n:4  },
+  { key:'sem', label:'Semifinal',   n:2  },
+  { key:'fin', label:'Final',       n:2  }
+];
+
+function matchLabel(phaseKey, idx){
+  var i = idx+1;
+  if(phaseKey==='r32') return 'Partido ' + i;
+  if(phaseKey==='oct') return 'Octavos ' + i;
+  if(phaseKey==='cua') return 'Cuartos ' + i;
+  if(phaseKey==='sem') return 'Semifinal ' + i;
+  if(phaseKey==='fin') return i===1 ? '3er Lugar' : 'GRAN FINAL';
+  return 'Partido ' + i;
+}
+
+// ============================================================
+// STATE
+// ============================================================
+var state = null; // loaded from storage
+var STORAGE_KEY = 'quiniela-state-v1';
+var activeTab = 'dashboard';
+var saveTimer = null;
+
+function defaultState(){
+  var s = { matches:{} };
+  PHASES.forEach(function(ph){
+    s.matches[ph.key] = [];
+    for(var i=0;i<ph.n;i++){
+      s.matches[ph.key].push({
+        local:'', visita:'',
+        rh:'', ra:'', // resultado real home/away
+        pred:{
+          papa:{h:'',a:''}, mama:{h:'',a:''}, saul:{h:'',a:''}, marcelo:{h:'',a:''}
+        }
+      });
+    }
+  });
+  return s;
+}
+
+function showToast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 1400);
+}
+
+var saveRetryDelay = 0;
+
+function scheduleSave(){
+  if(saveTimer) clearTimeout(saveTimer);
+  setSaveStatus('saving');
+  saveTimer = setTimeout(doSave, 150);
+}
+
+function setSaveStatus(kind){
+  var el = document.getElementById('saveStatus');
+  if(!el) return;
+  el.className = 'save-status ' + kind;
+  if(kind==='saving') el.textContent = '· guardando…';
+  else if(kind==='saved') el.textContent = '· guardado';
+  else if(kind==='error') el.textContent = '· sin conexión';
+  else el.textContent = '';
+}
+
+function doSave(){
+  if(saveTimer){ clearTimeout(saveTimer); saveTimer = null; }
+  try {
+    var payload = JSON.stringify(state);
+    window.storage.set(STORAGE_KEY, payload, false).then(function(){
+      saveRetryDelay = 0;
+      setSaveStatus('saved');
+      setTimeout(function(){ setSaveStatus(''); }, 1500);
+    }).catch(function(){
+      setSaveStatus('error');
+      retrySave();
+    });
+  } catch(e){
+    setSaveStatus('error');
+    retrySave();
+  }
+}
+
+function retrySave(){
+  saveRetryDelay = saveRetryDelay ? Math.min(saveRetryDelay * 2, 15000) : 1000;
+  setTimeout(doSave, saveRetryDelay);
+}
+
+// Safety net: flush any pending save immediately if the tab is hidden/closed
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'hidden' && saveTimer){
+    doSave();
+  }
+});
+window.addEventListener('pagehide', function(){
+  if(saveTimer) doSave();
+});
+
+function loadState(cb){
+  try {
+    window.storage.get(STORAGE_KEY, false).then(function(res){
+      if(res && res.value){
+        try {
+          var parsed = JSON.parse(res.value);
+          state = migrateState(parsed);
+        } catch(e){ state = defaultState(); }
+      } else {
+        state = defaultState();
+      }
+      cb();
+    }).catch(function(err){
+      state = defaultState();
+      cb();
+    });
+  } catch(e){
+    state = defaultState();
+    cb();
+  }
+}
+
+// in case phase sizes ever change, keep arrays correct length
+function migrateState(parsed){
+  var s = parsed && parsed.matches ? parsed : defaultState();
+  PHASES.forEach(function(ph){
+    if(!s.matches[ph.key]) s.matches[ph.key] = [];
+    while(s.matches[ph.key].length < ph.n){
+      s.matches[ph.key].push({ local:'', visita:'', rh:'', ra:'', pred:{papa:{h:'',a:''},mama:{h:'',a:''},saul:{h:'',a:''},marcelo:{h:'',a:''}} });
+    }
+    s.matches[ph.key] = s.matches[ph.key].slice(0, ph.n);
+    s.matches[ph.key].forEach(function(m){
+      if(!m.pred) m.pred = {};
+      PARTICIPANTS.forEach(function(p){
+        if(!m.pred[p.key]) m.pred[p.key] = {h:'',a:''};
+      });
+    });
+  });
+  return s;
+}
+
+// ============================================================
+// SCORING
+// ============================================================
+// returns points (3/2/0) or null if not computable
+function calcPoints(rh, ra, ph, pa){
+  if(rh==='' || ra==='' || ph==='' || pa==='') return null;
+  rh = parseInt(rh,10); ra = parseInt(ra,10);
+  ph = parseInt(ph,10); pa = parseInt(pa,10);
+  if(isNaN(rh)||isNaN(ra)||isNaN(ph)||isNaN(pa)) return null;
+  if(rh===ph && ra===pa) return 3;
+  var realRes = Math.sign(rh-ra);
+  var predRes = Math.sign(ph-pa);
+  if(realRes === predRes) return 2;
+  return 0;
+}
+
+function phaseTotals(phaseKey){
+  var totals = { papa:0, mama:0, saul:0, marcelo:0 };
+  var list = state.matches[phaseKey] || [];
+  list.forEach(function(m){
+    PARTICIPANTS.forEach(function(p){
+      var pr = m.pred[p.key];
+      var pts = calcPoints(m.rh, m.ra, pr.h, pr.a);
+      if(pts!==null) totals[p.key] += pts;
+    });
+  });
+  return totals;
+}
+
+function grandTotals(){
+  var totals = {};
+  PARTICIPANTS.forEach(function(p){ totals[p.key] = BASE_POINTS[p.key]; });
+  PHASES.forEach(function(ph){
+    var t = phaseTotals(ph.key);
+    PARTICIPANTS.forEach(function(p){ totals[p.key] += t[p.key]; });
+  });
+  return totals;
+}
+
+// ============================================================
+// RENDER: DASHBOARD
+// ============================================================
+function renderDashboard(){
+  var totals = grandTotals();
+  var phaseT = {};
+  PHASES.forEach(function(ph){ phaseT[ph.key] = phaseTotals(ph.key); });
+
+  var ranked = PARTICIPANTS.slice().sort(function(a,b){
+    return totals[b.key]-totals[a.key];
+  });
+
+  var medals = ['🥇','🥈','🥉','4°'];
+  var cardClasses = ['gold','silver','bronze',''];
+
+  var html = '<div class="podium-wrap">';
+  ranked.forEach(function(p, idx){
+    var breakdown = 'Base 85: ' + BASE_POINTS[p.key];
+    PHASES.forEach(function(ph){
+      breakdown += ' · ' + ph.label + ': ' + phaseT[ph.key][p.key];
+    });
+    html += '<div class="rank-card ' + cardClasses[idx] + '">' +
+      '<div class="rank-medal">' + medals[idx] + '</div>' +
+      '<div class="rank-info">' +
+        '<div class="rank-name">' + p.name + '</div>' +
+        '<div class="rank-breakdown">' + breakdown + '</div>' +
+      '</div>' +
+      '<div class="rank-points">' + totals[p.key] + '<small>pts</small></div>' +
+    '</div>';
+  });
+  html += '</div>';
+
+  html += '<div class="section-label">Detalle por fase</div>';
+  html += '<table class="phase-table"><thead><tr><th style="text-align:left;">Participante</th><th>Base</th>';
+  PHASES.forEach(function(ph){ html += '<th>'+ph.label.replace('Round of 32','R32')+'</th>'; });
+  html += '<th>Total</th></tr></thead><tbody>';
+  ranked.forEach(function(p){
+    html += '<tr><td class="namecol">'+p.name+'</td><td>'+BASE_POINTS[p.key]+'</td>';
+    PHASES.forEach(function(ph){ html += '<td>'+phaseT[ph.key][p.key]+'</td>'; });
+    html += '<td style="font-weight:800;color:#FFD166;">'+totals[p.key]+'</td></tr>';
+  });
+  html += '</tbody></table>';
+
+  html += '<button class="reset-btn" id="resetBtn">↺ Reiniciar todos los resultados y pronósticos</button>';
+
+  document.getElementById('app').innerHTML = '<div class="view active" id="view-dashboard">' + html + '</div>';
+
+  document.getElementById('resetBtn').addEventListener('click', function(){
+    if(confirm('¿Seguro que quieres borrar todos los resultados y pronósticos? Esta acción no se puede deshacer.')){
+      state = defaultState();
+      doSave();
+      render();
+      showToast('Quiniela reiniciada');
+    }
+  });
+}
+
+// ============================================================
+// RENDER: PHASE (matches)
+// ============================================================
+function renderPhase(phaseKey){
+  var phaseDef = PHASES.filter(function(p){return p.key===phaseKey;})[0];
+  var list = state.matches[phaseKey];
+
+  var html = '<div class="phase-header"><h2>' + phaseDef.label + '</h2><span>' + phaseDef.n + ' partidos</span></div>';
+
+  list.forEach(function(m, idx){
+    var pts = {};
+    PARTICIPANTS.forEach(function(p){
+      pts[p.key] = calcPoints(m.rh, m.ra, m.pred[p.key].h, m.pred[p.key].a);
+    });
+
+    html += '<div class="match-card" data-phase="'+phaseKey+'" data-idx="'+idx+'">';
+    html += '<div class="match-label">' + matchLabel(phaseKey, idx) + '</div>';
+
+    html += '<div class="teams-row">' +
+      '<input class="team-input local-input" type="text" placeholder="Equipo local" value="'+escAttr(m.local)+'">' +
+      '<span class="vs-label">VS</span>' +
+      '<input class="team-input visita-input" type="text" placeholder="Equipo visita" value="'+escAttr(m.visita)+'">' +
+    '</div>';
+
+    html += '<div class="result-row">' +
+      '<span class="lbl">Real</span>' +
+      '<input class="score-input rh-input" type="number" min="0" inputmode="numeric" placeholder="-" value="'+escAttr(m.rh)+'">' +
+      '<span class="score-dash">–</span>' +
+      '<input class="score-input ra-input" type="number" min="0" inputmode="numeric" placeholder="-" value="'+escAttr(m.ra)+'">' +
+    '</div>';
+
+    html += '<div class="pred-grid">';
+    PARTICIPANTS.forEach(function(p){
+      var pr = m.pred[p.key];
+      var ptVal = pts[p.key];
+      var ptClass = ptVal===3 ? 'pts3' : ptVal===2 ? 'pts2' : ptVal===0 ? 'pts0' : 'ptsna';
+      var ptText = ptVal===null ? '–' : ('+'+ptVal);
+      html += '<div class="pred-cell '+p.cls+'" data-participant="'+p.key+'">' +
+        '<span class="pname">'+p.name+'</span>' +
+        '<div class="pscore-wrap">' +
+          '<input class="pscore ph-input" type="number" min="0" inputmode="numeric" placeholder="-" value="'+escAttr(pr.h)+'">' +
+          '<span class="pdash">-</span>' +
+          '<input class="pscore pa-input" type="number" min="0" inputmode="numeric" placeholder="-" value="'+escAttr(pr.a)+'">' +
+        '</div>' +
+        '<span class="ppts '+ptClass+'">'+ptText+'</span>' +
+      '</div>';
+    });
+    html += '</div>'; // pred-grid
+
+    html += '</div>'; // match-card
+  });
+
+  document.getElementById('app').innerHTML = '<div class="view active" id="view-'+phaseKey+'">' + html + '</div>';
+
+  // attach listeners
+  var cards = document.querySelectorAll('.match-card');
+  cards.forEach(function(card){
+    var phase = card.getAttribute('data-phase');
+    var idx = parseInt(card.getAttribute('data-idx'),10);
+    var m = state.matches[phase][idx];
+
+    card.querySelector('.local-input').addEventListener('input', function(e){
+      m.local = e.target.value; scheduleSave();
+    });
+    card.querySelector('.visita-input').addEventListener('input', function(e){
+      m.visita = e.target.value; scheduleSave();
+    });
+    card.querySelector('.rh-input').addEventListener('input', function(e){
+      m.rh = e.target.value; scheduleSave(); refreshCardPoints(card, m);
+    });
+    card.querySelector('.ra-input').addEventListener('input', function(e){
+      m.ra = e.target.value; scheduleSave(); refreshCardPoints(card, m);
+    });
+
+    var predCells = card.querySelectorAll('.pred-cell');
+    predCells.forEach(function(cell){
+      var pk = cell.getAttribute('data-participant');
+      cell.querySelector('.ph-input').addEventListener('input', function(e){
+        m.pred[pk].h = e.target.value; scheduleSave(); refreshCardPoints(card, m);
+      });
+      cell.querySelector('.pa-input').addEventListener('input', function(e){
+        m.pred[pk].a = e.target.value; scheduleSave(); refreshCardPoints(card, m);
+      });
+    });
+  });
+}
+
+function refreshCardPoints(card, m){
+  var predCells = card.querySelectorAll('.pred-cell');
+  predCells.forEach(function(cell){
+    var pk = cell.getAttribute('data-participant');
+    var pts = calcPoints(m.rh, m.ra, m.pred[pk].h, m.pred[pk].a);
+    var ptEl = cell.querySelector('.ppts');
+    ptEl.className = 'ppts ' + (pts===3?'pts3':pts===2?'pts2':pts===0?'pts0':'ptsna');
+    ptEl.textContent = pts===null ? '–' : ('+'+pts);
+  });
+}
+
+function escAttr(v){
+  if(v===undefined||v===null) return '';
+  return String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+}
+
+// ============================================================
+// NAV
+// ============================================================
+function render(){
+  document.querySelectorAll('.tabbtn').forEach(function(btn){
+    btn.classList.toggle('active', btn.getAttribute('data-tab')===activeTab);
+  });
+  if(activeTab==='dashboard') renderDashboard();
+  else renderPhase(activeTab);
+  window.scrollTo(0,0);
+}
+
+document.getElementById('tabbar').addEventListener('click', function(e){
+  var btn = e.target.closest('.tabbtn');
+  if(!btn) return;
+  activeTab = btn.getAttribute('data-tab');
+  render();
+});
+
+// ============================================================
+// INIT
+// ============================================================
+loadState(function(){
+  render();
+});
+
+})();
+</script>
+</body>
+</html>
